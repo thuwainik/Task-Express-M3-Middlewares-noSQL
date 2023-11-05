@@ -9,33 +9,21 @@ exports.postsCreate = async (req, res) => {
   }
 };
 
-exports.postsDelete = async (req, res) => {
-  const { postId } = req.params;
+exports.postsDelete = async (req, res, next) => {
   try {
-    const foundPost = await Post.findById(postId);
-    if (foundPost) {
-      await foundPost.deleteOne();
-      res.status(204).end();
-    } else {
-      res.status(404).json({ message: "post not found" });
-    }
+    await req.post.deleteOne();
+    res.status(204).end();
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 
-exports.postsUpdate = async (req, res) => {
-  const { postId } = req.params;
+exports.postsUpdate = async (req, res, next) => {
   try {
-    const foundPost = await Post.findById(postId);
-    if (foundPost) {
-      await foundPost.updateOne(req.body);
-      res.status(204).end();
-    } else {
-      res.status(404).json({ message: "post not found" });
-    }
+    await req.post.updateOne(req.body);
+    res.status(204).end();
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 
@@ -45,5 +33,18 @@ exports.postsGet = async (req, res) => {
     res.json(posts);
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+};
+
+exports.fetchPost = async (postId, next) => {
+  try {
+    const post = await Post.findById(postId);
+    if (post) {
+      return post;
+    } else {
+      next({ msg: "Post Not Found!" });
+    }
+  } catch (error) {
+    next(error);
   }
 };
